@@ -245,10 +245,53 @@ public class UserDao extends Dao implements UserDaoInterface
         }
         return newId;
     }
-    
+
+    @Override
+    public int changePassword(String username, String oldPass, String newPass) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        int rowsAffected = -1;
+        try {
+            con = this.getConnection();
+
+            String query = "UPDATE user SET password = ? WHERE username = ? AND password = ?";
+            ps = con.prepareStatement(query);
+            ps.setString(1, newPass);
+            ps.setString(2, username);
+            ps.setString(3, oldPass);
+
+            rowsAffected = ps.executeUpdate();
+        }
+        catch (SQLException e){
+            System.out.println("An error occurred in the changePassword() method: " + e.getMessage());
+        }
+        finally{
+            try{
+                if (ps != null){
+                    ps.close();
+                }
+                if (con != null){
+                    freeConnection(con);
+                }
+            }
+            catch (SQLException e){
+                System.out.println("An error occurred when shutting down the changePassword() method: " + e.getMessage());
+            }
+        }
+        return rowsAffected;
+    }
+
     public static void main(String [] args){
         UserDao userDao = new UserDao("user_database");
-        int id = userDao.addUser("Michelle", "password", "Michelle", "Graham");
-        System.out.println("The new id is: " + id);
+        User u = userDao.findUserById(1);
+        System.out.println("User with id #1: " + u);
+        int changed = userDao.changePassword("smithj", "pword", "password");
+        if(changed == 1){
+            System.out.println("The password appears to have changed");
+        }else{
+            System.out.println("No change seems to have been made");
+        }
+        u = userDao.findUserById(1);
+        System.out.println("Password now contains: " + u.getPassword());
     }
 }

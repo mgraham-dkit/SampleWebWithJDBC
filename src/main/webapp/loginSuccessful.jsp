@@ -11,11 +11,14 @@
             if(username != null){
                 String msg = (String) session.getAttribute("msg");
                 if(msg != null){
-                    out.println("<div>" + msg + "</div>");
+                    %>
+                        <div><%=msg%></div>
+                    <%
                     session.removeAttribute("msg");
                 }
         %>
         <div>Hi there, <%=username%>!</div>
+        <div><a href="changePassword.jsp">Change your password</a></div>
         <%
             }else{
         %>

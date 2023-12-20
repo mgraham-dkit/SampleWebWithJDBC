@@ -40,6 +40,9 @@ public class Controller extends HttpServlet {
                 case "register":
                     forwardToJsp = registerCommand(request, response);
                     break;
+                case "changePassword":
+                    forwardToJsp = changePasswordCommand(request, response);
+                    break;
                 default:
                     forwardToJsp = "error.jsp";
                     String error = "No such action defined for this application. Please try again.";
@@ -90,7 +93,7 @@ public class Controller extends HttpServlet {
             UserDao userDao = new UserDao("user_database");
             int id = userDao.addUser(uname, pword, first, last);
             if (id == -1) {
-                forwardToJsp = "error.jsp";
+                forwardToJsp = " ";
                 String error = "This user could not be added. Please <a href=\"register.jsp\">try again.</a>";
                 session.setAttribute("errorMessage", error);
             } else {
@@ -104,6 +107,53 @@ public class Controller extends HttpServlet {
         } else {
             forwardToJsp = "error.jsp";
             String error = "Some information was not supplied. Please <a href=\"register.jsp\">try again.</a>";
+            session.setAttribute("errorMessage", error);
+        }
+        return forwardToJsp;
+    }
+
+    private String changePasswordCommand(HttpServletRequest request, HttpServletResponse response){
+        String forwardToJsp = "index.jsp";
+        HttpSession session = request.getSession(true);
+        User u = (User) session.getAttribute("user");
+        if(u != null){
+            String oldPass = request.getParameter("oldPassword");
+            String newPassOne = request.getParameter("newPassword");
+            String newPassTwo = request.getParameter("newPasswordCopy");
+            if(oldPass != null && newPassOne != null && newPassTwo != null && !oldPass.isBlank() && !newPassOne.isBlank() && !newPassTwo.isBlank()){
+                // Real password info was provided for all fields
+                if(newPassOne.equals(newPassTwo)){
+                    // New passwords match, continue to do database action
+                    UserDao userDao = new UserDao("user_database");
+                    int result = userDao.changePassword(u.getUsername(), oldPass, newPassOne);
+                    if(result == 1){
+                        // Password appears successfully changed
+                        forwardToJsp = "loginSuccessful.jsp";
+                        String msg = "Your password has been changed successfully!";
+                        session.setAttribute("msg", msg);
+                    }else{
+                        forwardToJsp = "error.jsp";
+                        String error = "The password could not be changed at this time. Did you correctly enter your " +
+                                "old password? Please <a href=\"changePassword.jsp\">go " +
+                                "back" + "</a> and try again.";
+                        session.setAttribute("errorMessage", error);
+                    }
+                }else{
+                    forwardToJsp = "error.jsp";
+                    String error = "Supplied new passwords do not match. Please <a href=\"changePassword.jsp\">go " +
+                            "back" + "</a> and try again.";
+                    session.setAttribute("errorMessage", error);
+                }
+            }else{
+                forwardToJsp = "error.jsp";
+                String error = "One or more password fields were not provided. Please <a href=\"changePassword" +
+                        ".jsp\">go back</a>" +
+                        " and try again.";
+                session.setAttribute("errorMessage", error);
+            }
+        }else{
+            forwardToJsp = "error.jsp";
+            String error = "You are not currently logged in. Please <a href=\"login.jsp\">login</a> and try again.";
             session.setAttribute("errorMessage", error);
         }
         return forwardToJsp;
