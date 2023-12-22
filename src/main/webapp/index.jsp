@@ -20,5 +20,14 @@
             <%
             }
         %>
+        <h1>Search for users containing username:</h1>
+        <form action="searchResults.jsp" method="get">
+            <table>
+                <tr>
+                    <td> Username : </td><td> <input name="username" size=30 type="text" required /> </td>
+                </tr>
+            </table>
+            <input type="submit" value="Submit" />
+        </form>
     </body>
 </html>

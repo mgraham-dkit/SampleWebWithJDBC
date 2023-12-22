@@ -281,6 +281,55 @@ public class UserDao extends Dao implements UserDaoInterface
         return rowsAffected;
     }
 
+    @Override
+    public List<User> findAllUsersContainingUsername(String username) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<User> users = new ArrayList<User>();
+
+        try{
+            //Get connection object using the methods in the super class (Dao.java)...
+            con = this.getConnection();
+
+            String query = "SELECT * FROM USER WHERE username LIKE ?";
+            ps = con.prepareStatement(query);
+            ps.setString(1, "%"+username+"%");
+
+            //Using a PreparedStatement to execute SQL...
+            rs = ps.executeQuery();
+            while (rs.next()){
+                int userId = rs.getInt("ID");
+                String uname = rs.getString("USERNAME");
+                String password = rs.getString("PASSWORD");
+                String lastname = rs.getString("LAST_NAME");
+                String firstname = rs.getString("FIRST_NAME");
+                User u = new User(userId, firstname, lastname, uname, password);
+                users.add(u);
+            }
+        }
+        catch (SQLException e){
+            System.out.println("An error occurred in the findAllUsersContainingUsername() method: " + e.getMessage());
+        }
+        finally{
+            try{
+                if (rs != null){
+                    rs.close();
+                }
+                if (ps != null){
+                    ps.close();
+                }
+                if (con != null){
+                    freeConnection(con);
+                }
+            }
+            catch (SQLException e){
+                System.out.println("An error occurred when shutting down the findAllUsersContainingUsername() method: " + e.getMessage());
+            }
+        }
+        return users;     // may be empty
+    }
+
     public static void main(String [] args){
         UserDao userDao = new UserDao("user_database");
         User u = userDao.findUserById(1);

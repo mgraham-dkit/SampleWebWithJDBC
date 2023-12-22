@@ -15,4 +15,5 @@ public interface UserDaoInterface
     User findUserById(int id);
     int addUser(String uname, String pword, String fName, String lName);
     int changePassword(String username, String oldPass, String newPass);
+    List<User> findAllUsersContainingUsername(String username);
 }
